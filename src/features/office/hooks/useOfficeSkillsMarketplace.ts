@@ -27,6 +27,18 @@ type MarketplaceMessage = {
   text: string;
 };
 
+export const resolvePreferredMarketplaceAgentId = (
+  agents: AgentState[],
+  preferredAgentId?: string | null,
+) => {
+  const preferred = (preferredAgentId ?? "").trim();
+  if (preferred && agents.some((agent) => agent.agentId === preferred)) {
+    return preferred;
+  }
+  const firstNonMain = agents.find((agent) => agent.agentId.trim().toLowerCase() !== "main");
+  return firstNonMain?.agentId ?? agents[0]?.agentId ?? null;
+};
+
 export const useOfficeSkillsMarketplace = ({
   client,
   status,
@@ -73,18 +85,13 @@ export const useOfficeSkillsMarketplace = ({
   );
 
   useEffect(() => {
-    const preferred = (preferredAgentId ?? "").trim();
     const current = (selectedAgentId ?? "").trim();
     const hasCurrent =
       current.length > 0 && agents.some((agent) => agent.agentId === current);
     if (hasCurrent) {
       return;
     }
-    if (preferred && agents.some((agent) => agent.agentId === preferred)) {
-      setSelectedAgentId(preferred);
-      return;
-    }
-    setSelectedAgentId(agents[0]?.agentId ?? null);
+    setSelectedAgentId(resolvePreferredMarketplaceAgentId(agents, preferredAgentId));
   }, [agents, preferredAgentId, selectedAgentId]);
 
   const loadMarketplace = useCallback(

@@ -125,6 +125,12 @@ const hasNonEmptyDeviceToken = (params) => {
   return typeof raw === "string" && raw.trim().length > 0;
 };
 
+const hasSharedBrowserAuth = (params) => {
+  return (
+    hasNonEmptyToken(params) || hasNonEmptyPassword(params) || hasNonEmptyDeviceToken(params)
+  );
+};
+
 const hasCompleteDeviceAuth = (params) => {
   const device = params && isObject(params) && isObject(params.device) ? params.device : null;
   if (!device) {
@@ -206,14 +212,11 @@ function createGatewayProxy(options) {
     };
 
     const forwardConnectFrame = (frame) => {
-      const browserHasAuth =
-        hasNonEmptyToken(frame.params) ||
-        hasNonEmptyPassword(frame.params) ||
-        hasNonEmptyDeviceToken(frame.params) ||
-        hasCompleteDeviceAuth(frame.params);
+      const browserHasSharedAuth = hasSharedBrowserAuth(frame.params);
+      const browserHasDeviceAuth = hasCompleteDeviceAuth(frame.params);
 
       const requiresToken = upstreamAdapterType === "openclaw";
-      if (requiresToken && !upstreamToken && !browserHasAuth) {
+      if (requiresToken && !upstreamToken && !browserHasSharedAuth && !browserHasDeviceAuth) {
         sendConnectError(
           "studio.gateway_token_missing",
           "Upstream gateway token is not configured on the Studio host."
@@ -221,7 +224,7 @@ function createGatewayProxy(options) {
         return;
       }
 
-      const connectFrame = browserHasAuth
+      const connectFrame = browserHasSharedAuth || !upstreamToken
         ? frame
         : {
             ...frame,

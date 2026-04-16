@@ -4,6 +4,7 @@ const next = require("next");
 
 const { createAccessGate } = require("./access-gate");
 const { createGatewayProxy } = require("./gateway-proxy");
+const { resolveLoopbackRedirectUrl } = require("./loopback-redirect");
 const { assertPublicHostAllowed, resolveHosts } = require("./network-policy");
 const { loadUpstreamGatewaySettings } = require("./studio-settings");
 
@@ -117,10 +118,22 @@ async function main() {
   const createServer = () =>
     useHttps
       ? https.createServer(httpsCert, (req, res) => {
+          const redirectUrl = resolveLoopbackRedirectUrl(req, { port, useHttps });
+          if (redirectUrl) {
+            res.writeHead(307, { Location: redirectUrl, "Cache-Control": "no-store" });
+            res.end();
+            return;
+          }
           if (accessGate.handleHttp(req, res)) return;
           handle(req, res);
         })
       : http.createServer((req, res) => {
+          const redirectUrl = resolveLoopbackRedirectUrl(req, { port, useHttps });
+          if (redirectUrl) {
+            res.writeHead(307, { Location: redirectUrl, "Cache-Control": "no-store" });
+            res.end();
+            return;
+          }
           if (accessGate.handleHttp(req, res)) return;
           handle(req, res);
         });

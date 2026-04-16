@@ -32,6 +32,12 @@ const isRootWorkspace = (workspaceDir: string) => {
   return leaf === "workspace";
 };
 
+const isReservedMainTarget = (params: { agentId?: string; agentName?: string }) => {
+  const agentId = normalizeOptional(params.agentId).toLowerCase();
+  const agentName = normalizeOptional(params.agentName).toLowerCase();
+  return agentId === "main" || agentName === "main";
+};
+
 const validateWorkspaceInstallTarget = (params: {
   workspaceDir: string;
   agentId?: string;
@@ -42,8 +48,11 @@ const validateWorkspaceInstallTarget = (params: {
       normalizeOptional(params.agentName) ||
       normalizeOptional(params.agentId) ||
       "the selected agent";
+    const targetHint = isReservedMainTarget(params)
+      ? " The reserved main agent uses the gateway root workspace, so packaged workspace skills like task-manager must be installed into another agent with its own workspace. Create or select a non-main agent, then refresh the marketplace."
+      : " Packaged workspace skills must target an agent workspace, not the gateway root workspace. Select another agent and refresh the marketplace before installing.";
     throw new Error(
-      `Cannot install a packaged skill because the workspace reported for ${targetLabel} resolves to the gateway root workspace (${params.workspaceDir}). Re-select the agent and refresh the marketplace before installing.`
+      `Cannot install a packaged skill because the workspace reported for ${targetLabel} resolves to the gateway root workspace (${params.workspaceDir}).${targetHint}`
     );
   }
 };
