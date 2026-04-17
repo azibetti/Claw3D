@@ -18,6 +18,7 @@ type HQSidebarProps = {
   onOpenMarketplace: () => void;
   onAddAgent?: () => void;
   onOpenCompanyBuilder?: () => void;
+  onOpenOperationsBoard?: () => void;
   inboxPanel: ReactNode;
   historyPanel: ReactNode;
   kanbanPanel: ReactNode;
@@ -44,6 +45,7 @@ export function HQSidebar({
   onOpenMarketplace,
   onAddAgent,
   onOpenCompanyBuilder,
+  onOpenOperationsBoard,
   inboxPanel,
   historyPanel,
   kanbanPanel,
@@ -145,6 +147,15 @@ export function HQSidebar({
                 className="mt-2 rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-200 transition-colors hover:border-emerald-400/40 hover:text-emerald-100"
               >
                 Build Company
+              </button>
+            ) : null}
+            {!railOnly && onOpenOperationsBoard ? (
+              <button
+                type="button"
+                onClick={onOpenOperationsBoard}
+                className="mt-2 rounded border border-violet-500/20 bg-violet-500/10 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-violet-200 transition-colors hover:border-violet-400/40 hover:text-violet-100"
+              >
+                Operations Board
               </button>
             ) : null}
             {railOnly ? (

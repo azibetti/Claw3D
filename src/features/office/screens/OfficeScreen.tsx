@@ -4534,6 +4534,9 @@ export function OfficeScreen({
           onOpenMarketplace={() => setMarketplaceOpen(true)}
           onAddAgent={handleOpenCreateAgentWizard}
           onOpenCompanyBuilder={handleOpenCompanyBuilder}
+          onOpenOperationsBoard={() => {
+            router.push("/office/operations");
+          }}
           inboxPanel={
             <InboxPanel
               agents={state.agents}
